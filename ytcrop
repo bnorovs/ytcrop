@@ -1,0 +1,52 @@
+#!/bin/bash
+
+### Functions
+
+help() {
+	echo "A commandline tool for cropping clips out of youtube videos."
+	echo "Usage: ytcrop -u <url> <--begin | -b> x <--duration | -d> y"
+	echo ""
+	echo "Parameters: "
+	echo "  -u, --url		URL of the video you want to crop"
+	echo "  -b, --begin		Start time to begin crop. Can be in seconds or video-formatted time HH:MM:SS.SS"
+	echo "  -d, --duration	Duration of the crop, starting from the start time. Can be in seconds or video-formatted time HH:MM:SS.SS"
+	echo "  -o, --output	Specify the name of the cropped file"
+	echo "  -h, --help		Displays this message"
+}
+
+get_audio() {
+	title=`youtube-dl -e "$url"`
+	audio=`youtube-dl -f bestaudio -gx "$url"`
+}
+
+get_url() {
+	video=$(youtube-dl -f bestvideo -g $url)
+	`ffmpeg -ss "$begin" -i "$video" -ss "$begin" -ss "$begin" -i "$audio" -t "$duration" -map 0:v -map 1:a -c:v libx264 -c:a copy "$title.mp4"`
+}
+
+while [ "$1" != " " ]; do
+		case $1 in
+			-u | --url )			shift
+									url=$1
+									;;
+			-b | --begin )			shift
+									begin=$1
+									;;
+			-d | --duration )		shift
+									duration=$1
+									;;
+			-o | --output )			shift
+									output=$1
+									;;
+			-h | --help )			help
+									exit
+									;;
+			* ) 					echo "Invalid input. Try --help."
+									exit 1
+		esac
+		shift
+done
+
+get_audio
+get_url "url begin duration"
+`mv "$title.mp4" "$output"`
