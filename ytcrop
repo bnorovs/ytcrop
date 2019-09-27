@@ -20,11 +20,11 @@ get_audio() {
 }
 
 get_url() {
-	video=$(youtube-dl -f bestvideo -g $url)
+	video=`youtube-dl -f bestvideo -g "$url"`
 	`ffmpeg -ss "$begin" -i "$video" -ss "$begin" -ss "$begin" -i "$audio" -t "$duration" -map 0:v -map 1:a -c:v libx264 -c:a copy "$title.mp4"`
 }
 
-while [ "$1" != " " ]; do
+while [ "$1" != "" ]; do
 		case $1 in
 			-u | --url )			shift
 									url=$1
@@ -36,7 +36,7 @@ while [ "$1" != " " ]; do
 									duration=$1
 									;;
 			-o | --output )			shift
-									output=$1
+									output_dir=$1
 									;;
 			-h | --help )			help
 									exit
@@ -49,4 +49,7 @@ done
 
 get_audio
 get_url "url begin duration"
-`mv "$title.mp4" "$output"`
+if [ $output_dir != "" ] 
+then
+	mv "$title.mp4" "$output_dir"
+fi
